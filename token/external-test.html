@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外部接口测试 - Augment2API</title>
+    
+    <!-- 引入导航组件样式 -->
+    <link rel="stylesheet" href="/components/nav.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .step {
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        .step.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .step.completed {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .step.completed .step-number {
+            background: #48bb78;
+        }
+        
+        .step h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .input-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 10px 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn.success {
+            background: #48bb78;
+        }
+        
+        .btn.success:hover {
+            background: #38a169;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            word-break: break-all;
+        }
+        
+        .result.success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #22543d;
+        }
+        
+        .result.error {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+        }
+        
+        .result.info {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            color: #2a4365;
+        }
+        
+        .url-display {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .url-display a {
+            color: #90cdf4;
+            text-decoration: none;
+        }
+        
+        .url-display a:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #fffbeb;
+            border: 1px solid #f6e05e;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #744210;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏容器 -->
+    <div id="app-nav"></div>
+    
+    <div class="container">
+        <div class="main-card">
+            <h1>🧪 外部接口完整测试</h1>
+            
+            <div class="info-box">
+                <strong>📋 测试说明：</strong>
+                <p>这个页面将完整测试外部API接口的整个流程：获取授权链接 → 完成授权 → 验证结果</p>
+            </div>
+
+            <!-- 步骤1：配置Token -->
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <h3>配置用户Token</h3>
+                <div class="input-group">
+                    <label for="userToken">用户Token（从个人中心获取）：</label>
+                    <input type="text" id="userToken" placeholder="输入您的用户Token">
+                </div>
+                <button class="btn" id="validateTokenBtn" onclick="validateToken()">验证Token</button>
+                <div id="tokenResult" class="result hidden"></div>
+            </div>
+
+            <!-- 步骤2：获取授权链接 -->
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <h3>获取授权链接</h3>
+                <p>使用外部API获取OAuth授权链接</p>
+                <button class="btn" id="getAuthBtn" onclick="getAuthUrl()" disabled>获取授权链接</button>
+                <div id="authUrlResult" class="result hidden"></div>
+                <div id="authUrlDisplay" class="hidden">
+                    <p><strong>授权链接：</strong></p>
+                    <div class="url-display" id="authUrl"></div>
+                    <button class="btn success" onclick="openAuthUrl()">🚀 打开授权页面</button>
+                </div>
+            </div>
+
+            <!-- 步骤3：完成授权 -->
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <h3>完成授权</h3>
+                <p>在授权页面完成授权后，将返回的授权响应粘贴到下面：</p>
+                <div class="input-group">
+                    <label for="authResponse">授权响应（JSON格式）：</label>
+                    <textarea id="authResponse" placeholder='粘贴授权响应，格式如：{"code":"xxx","state":"xxx","tenant_url":"xxx"}'></textarea>
+                </div>
+                <button class="btn" id="completeAuthBtn" onclick="completeAuth()" disabled>完成授权</button>
+                <div id="completeAuthResult" class="result hidden"></div>
+            </div>
+
+            <!-- 步骤4：验证结果 -->
+            <div class="step" id="step4">
+                <div class="step-number">4</div>
+                <h3>验证结果</h3>
+                <p>验证授权是否成功完成，并显示获取的访问令牌信息</p>
+                <button class="btn" id="verifyBtn" onclick="verifyResult()" disabled>验证结果</button>
+                <div id="verifyResult" class="result hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入导航组件脚本 -->
+    <script src="/components/nav.js"></script>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        let currentToken = '';
+        let authUrl = '';
+        let accessToken = '';
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', async () => {
+            // 初始化导航栏
+            await AppNav.init({
+                showUserInfo: true,
+                showProfileBtn: true,
+                showHomeBtn: true,
+                customButtons: [
+                    {
+                        text: 'API文档',
+                        href: '/api-docs',
+                        type: 'primary',
+                        icon: '📚'
+                    }
+                ]
+            });
+            
+            // 自动填入用户Token
+            autoFillUserToken();
+        });
+        
+        // 自动填入用户Token
+        function autoFillUserToken() {
+            const token = getUserToken();
+            if (token) {
+                document.getElementById('userToken').value = token;
+            }
+        }
+        
+        // 获取用户Token
+        function getUserToken() {
+            // 从Cookie中获取
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'auth_token') {
+                    return value;
+                }
+            }
+            
+            // 从localStorage获取
+            return localStorage.getItem('auth_token');
+        }
+        
+        // 显示结果
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.className = `result ${type}`;
+            element.classList.remove('hidden');
+        }
+        
+        // 设置步骤状态
+        function setStepStatus(stepNumber, status) {
+            const step = document.getElementById(`step${stepNumber}`);
+            step.classList.remove('active', 'completed');
+            if (status === 'active') {
+                step.classList.add('active');
+            } else if (status === 'completed') {
+                step.classList.add('completed');
+            }
+        }
+        
+        // 启用/禁用按钮
+        function setButtonEnabled(buttonId, enabled) {
+            const button = document.getElementById(buttonId);
+            button.disabled = !enabled;
+        }
+        
+        // 显示加载状态
+        function setLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            if (!button) {
+                console.error(`Button with id '${buttonId}' not found`);
+                return;
+            }
+
+            if (loading) {
+                const originalText = button.textContent;
+                button.setAttribute('data-original-text', originalText);
+                button.innerHTML = originalText + '<span class="loading"></span>';
+                button.disabled = true;
+            } else {
+                const originalText = button.getAttribute('data-original-text') || button.textContent.replace(/\s*$/, '');
+                button.innerHTML = originalText;
+                button.disabled = false;
+                button.removeAttribute('data-original-text');
+            }
+        }
+
+        // 步骤1：验证Token
+        async function validateToken() {
+            const token = document.getElementById('userToken').value.trim();
+            if (!token) {
+                showResult('tokenResult', '请输入用户Token', 'error');
+                return;
+            }
+
+            setLoading('validateTokenBtn', true);
+
+            try {
+                // 测试Token是否有效
+                const response = await fetch(`${API_BASE}/api/user`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    currentToken = token;
+                    showResult('tokenResult', `✅ Token验证成功\n用户: ${userData.user.email}`, 'success');
+
+                    // 完成步骤1，激活步骤2
+                    setStepStatus(1, 'completed');
+                    setStepStatus(2, 'active');
+                    setButtonEnabled('getAuthBtn', true);
+                } else {
+                    const errorData = await response.json();
+                    showResult('tokenResult', `❌ Token验证失败\n${errorData.error || '无效的Token'}`, 'error');
+                }
+            } catch (error) {
+                showResult('tokenResult', `❌ 验证失败\n${error.message}`, 'error');
+            } finally {
+                setLoading('validateTokenBtn', false);
+            }
+        }
+
+        // 步骤2：获取授权链接
+        async function getAuthUrl() {
+            if (!currentToken) {
+                showResult('authUrlResult', '请先验证Token', 'error');
+                return;
+            }
+
+            setLoading('getAuthBtn', true);
+
+            try {
+                const response = await fetch(`${API_BASE}/api/external/auth-url`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.authorize_url) {
+                    authUrl = data.authorize_url;
+                    showResult('authUrlResult', `✅ 授权链接获取成功`, 'success');
+
+                    // 显示授权链接
+                    document.getElementById('authUrl').innerHTML = `<a href="${authUrl}" target="_blank">${authUrl}</a>`;
+                    document.getElementById('authUrlDisplay').classList.remove('hidden');
+
+                    // 完成步骤2，激活步骤3
+                    setStepStatus(2, 'completed');
+                    setStepStatus(3, 'active');
+                    setButtonEnabled('completeAuthBtn', true);
+                } else {
+                    showResult('authUrlResult', `❌ 获取授权链接失败\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult('authUrlResult', `❌ 请求失败\n${error.message}`, 'error');
+            } finally {
+                setLoading('getAuthBtn', false);
+            }
+        }
+
+        // 打开授权页面
+        function openAuthUrl() {
+            if (authUrl) {
+                window.open(authUrl, '_blank');
+            }
+        }
+
+        // 步骤3：完成授权
+        async function completeAuth() {
+            const authResponse = document.getElementById('authResponse').value.trim();
+            if (!authResponse) {
+                showResult('completeAuthResult', '请输入授权响应', 'error');
+                return;
+            }
+
+            let authData;
+            try {
+                authData = JSON.parse(authResponse);
+            } catch (error) {
+                showResult('completeAuthResult', '❌ 授权响应格式错误，请输入有效的JSON', 'error');
+                return;
+            }
+
+            if (!authData.code || !authData.state || !authData.tenant_url) {
+                showResult('completeAuthResult', '❌ 授权响应缺少必需字段：code, state, tenant_url', 'error');
+                return;
+            }
+
+            setLoading('completeAuthBtn', true);
+
+            try {
+                const response = await fetch(`${API_BASE}/api/external/complete-auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(authData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    accessToken = data.token;
+                    showResult('completeAuthResult', `✅ 授权完成成功\n访问令牌: ${data.token.substring(0, 50)}...\n租户URL: ${data.tenant_url}`, 'success');
+
+                    // 完成步骤3，激活步骤4
+                    setStepStatus(3, 'completed');
+                    setStepStatus(4, 'active');
+                    setButtonEnabled('verifyBtn', true);
+                } else {
+                    showResult('completeAuthResult', `❌ 授权完成失败\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult('completeAuthResult', `❌ 请求失败\n${error.message}`, 'error');
+            } finally {
+                setLoading('completeAuthBtn', false);
+            }
+        }
+
+        // 步骤4：验证结果
+        async function verifyResult() {
+            if (!accessToken) {
+                showResult('verifyResult', '没有可验证的访问令牌', 'error');
+                return;
+            }
+
+            setLoading('verifyBtn', true);
+
+            try {
+                // 获取用户的token列表来验证是否保存成功
+                const response = await fetch(`${API_BASE}/api/user/tokens`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const tokens = data.tokens || [];
+
+                    // 查找刚刚创建的token
+                    const newToken = tokens.find(t => t.token === accessToken);
+
+                    if (newToken) {
+                        showResult('verifyResult', `✅ 验证成功！Token已成功保存到数据库\n\nToken详情:\nID: ${newToken.id}\nToken: ${newToken.token}\n租户URL: ${newToken.tenant_url}\n创建时间: ${newToken.created_at}\n状态: ${newToken.is_active ? '活跃' : '已销毁'}`, 'success');
+
+                        // 完成所有步骤
+                        setStepStatus(4, 'completed');
+                    } else {
+                        showResult('verifyResult', '⚠️ Token获取成功，但在数据库中未找到对应记录', 'error');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    showResult('verifyResult', `❌ 验证失败\n${errorData.error || '无法获取token列表'}`, 'error');
+                }
+            } catch (error) {
+                showResult('verifyResult', `❌ 验证失败\n${error.message}`, 'error');
+            } finally {
+                setLoading('verifyBtn', false);
+            }
+        }
+    </script>
+</body>
+</html>
