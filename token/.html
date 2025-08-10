@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>token</title>
+
+    <!-- 引入导航组件样式 -->
+    <link rel="stylesheet" href="/components/nav.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* 页面特定样式 */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .main-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a5568;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .step {
+            margin: 25px 0;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+        }
+        .step:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .code-input {
+            width: 100%;
+            height: 120px;
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        .code-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f0fff4;
+            border: 2px solid #68d391;
+            animation: slideIn 0.3s ease;
+        }
+        .error {
+            background: #fed7d7;
+            border-color: #fc8181;
+        }
+        .info {
+            background: #ebf8ff;
+            border: 2px solid #63b3ed;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-waiting { background: #fbb6ce; }
+        .status-success { background: #68d391; }
+        .status-error { background: #fc8181; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏容器 -->
+    <div id="app-nav"></div>
+
+    <div class="container">
+        <div class="main-card">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1>🔐 Augment OAuth 授权</h1>
+                <p class="subtitle">Node.js 版本 - 简化的 OAuth 授权流程</p>
+            </div>
+        
+        <div class="info">
+            <h3>📋 使用说明</h3>
+            <p>这是一个基于 Node.js 的简化 Augment OAuth 授权流程。通过这个页面，您可以：</p>
+            <ul>
+                <li>🔗 获取 Augment 授权链接</li>
+                <li>🎯 完成授权后获取访问令牌</li>
+                <li>🚀 使用令牌调用 OpenAI 兼容的 API</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">1</span>获取授权链接</h3>
+            <p>点击下面的按钮获取 Augment 授权链接：</p>
+            <button onclick="getAuthUrl()" id="authBtn">
+                <span class="status-indicator status-waiting"></span>
+                获取授权链接
+            </button>
+            <div id="authUrlResult"></div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">2</span>完成授权</h3>
+            <p>在新窗口中完成授权后，将返回的授权响应粘贴到下面的文本框中：</p>
+            <textarea class="code-input" id="authResponse" placeholder='粘贴授权响应，格式如：{"code":"xxx","state":"xxx","tenant_url":"xxx"}'></textarea>
+            <button onclick="submitAuthCode()" id="submitBtn">
+                <span class="status-indicator status-waiting"></span>
+                提交授权码
+            </button>
+            <div id="tokenResult"></div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 引入导航组件脚本 -->
+    <script src="/components/nav.js"></script>
+
+    <script>
+        let isLoading = false;
+        let currentUser = null;
+
+        // 这些函数现在由导航组件处理
+
+        // 页面加载时初始化
+        window.addEventListener('load', async () => {
+            try {
+                // 初始化导航栏（会自动检查登录状态）
+                await AppNav.init({
+                    showUserInfo: true,
+                    showProfileBtn: true,
+                    showHomeBtn: false, // 当前就是主页，不显示主页按钮
+                    customButtons: [
+                        {
+                            text: 'API文档',
+                            href: '/api-docs',
+                            type: 'primary',
+                            icon: '📚'
+                        },
+                        {
+                            text: '外部接口测试',
+                            href: '/external-test',
+                            type: 'primary',
+                            icon: '🧪'
+                        }
+                    ]
+                });
+
+                console.log('页面初始化完成');
+            } catch (error) {
+                console.error('页面初始化失败:', error);
+                // 如果初始化失败，可能是认证问题，跳转到登录页
+                window.location.href = '/login';
+            }
+        });
+
+        function setLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            const indicator = button.querySelector('.status-indicator');
+            
+            if (loading) {
+                button.disabled = true;
+                button.innerHTML = '<span class="loading"></span>处理中...';
+                isLoading = true;
+            } else {
+                button.disabled = false;
+                isLoading = false;
+            }
+        }
+
+        async function getAuthUrl() {
+            if (isLoading) return;
+            
+            setLoading('authBtn', true);
+            
+            try {
+                const response = await fetch('/auth');
+                const data = await response.json();
+                
+                if (data.authorize_url) {
+                    const resultDiv = document.getElementById('authUrlResult');
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <p><strong>✅ 授权链接生成成功：</strong></p>
+                            <p style="word-break: break-all; margin: 10px 0;">
+                                <a href="${data.authorize_url}" target="_blank" style="color: #667eea; text-decoration: none;">
+                                    ${data.authorize_url}
+                                </a>
+                            </p>
+                            <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="window.open('${data.authorize_url}', '_blank')" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    🚀 在新窗口中打开
+                                </button>
+                                <button onclick="copyAuthUrl('${data.authorize_url}')" style="padding: 8px 16px; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    📋 复制链接
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 更新按钮状态
+                    document.getElementById('authBtn').innerHTML = '<span class="status-indicator status-success"></span>授权链接已生成';
+                } else {
+                    throw new Error('获取授权链接失败');
+                }
+            } catch (error) {
+                document.getElementById('authUrlResult').innerHTML = `
+                    <div class="result error">
+                        <strong>❌ 错误:</strong> ${error.message}
+                    </div>
+                `;
+                document.getElementById('authBtn').innerHTML = '<span class="status-indicator status-error"></span>获取失败，点击重试';
+            } finally {
+                setLoading('authBtn', false);
+            }
+        }
+
+        async function submitAuthCode() {
+            if (isLoading) return;
+            
+            const authResponse = document.getElementById('authResponse').value.trim();
+            
+            if (!authResponse) {
+                alert('请输入授权响应');
+                return;
+            }
+
+            setLoading('submitBtn', true);
+
+            try {
+                // 验证JSON格式
+                const authData = JSON.parse(authResponse);
+                
+                if (!authData.code || !authData.state || !authData.tenant_url) {
+                    throw new Error('授权响应格式不正确，缺少必要字段');
+                }
+                
+                const response = await fetch('/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: authResponse
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // 从授权响应中提取租户URL
+                    const tenantUrl = authData.tenant_url || '未知';
+
+                    document.getElementById('tokenResult').innerHTML = `
+                        <div class="result">
+                            <p><strong>🎉 授权成功！</strong></p>
+                            <p><strong>访问令牌：</strong></p>
+                            <p style="word-break: break-all; background: #f1f5f9; padding: 10px; border-radius: 5px; font-family: monospace; margin-bottom: 15px;">
+                                ${result.token}
+                            </p>
+                            <p><strong>租户URL：</strong></p>
+                            <p style="word-break: break-all; background: #f0f9ff; padding: 10px; border-radius: 5px; font-family: monospace;">
+                                ${tenantUrl}
+                            </p>
+                        </div>
+                    `;
+
+                    // 更新按钮状态
+                    document.getElementById('submitBtn').innerHTML = '<span class="status-indicator status-success"></span>授权成功';
+
+
+                } else {
+                    throw new Error(result.error || '授权失败');
+                }
+            } catch (error) {
+                document.getElementById('tokenResult').innerHTML = `
+                    <div class="result error">
+                        <strong>❌ 错误:</strong> ${error.message}
+                    </div>
+                `;
+                document.getElementById('submitBtn').innerHTML = '<span class="status-indicator status-error"></span>提交失败，点击重试';
+            } finally {
+                setLoading('submitBtn', false);
+            }
+        }
+
+        // 复制授权链接
+        async function copyAuthUrl(url) {
+            try {
+                await navigator.clipboard.writeText(url);
+
+                // 显示复制成功提示
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ 已复制';
+                button.style.background = '#38a169';
+
+                // 2秒后恢复原状
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#48bb78';
+                }, 2000);
+
+            } catch (error) {
+                // 如果复制失败，使用备用方法
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                // 显示复制成功提示
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ 已复制';
+                button.style.background = '#38a169';
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#48bb78';
+                }, 2000);
+            }
+        }
+
+
+    </script>
+</body>
+</html>
