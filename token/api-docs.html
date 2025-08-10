@@ -1,0 +1,401 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 文档 - Augment2API</title>
+    
+    <!-- 引入导航组件样式 -->
+    <link rel="stylesheet" href="/components/nav.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #4a5568;
+            margin: 30px 0 15px 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .method.get {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .method.post {
+            background: #667eea;
+            color: white;
+        }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .token-display {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .token-display strong {
+            color: #c53030;
+        }
+        
+        .example {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .warning {
+            background: #fffbeb;
+            border: 1px solid #f6e05e;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #5a67d8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏容器 -->
+    <div id="app-nav"></div>
+    
+    <div class="container">
+        <div class="main-card">
+            <h1>📚 Augment2API 外部接口文档</h1>
+            
+            <div class="warning">
+                <strong>⚠️ 重要提示：</strong>
+                <p>所有外部API接口都需要在请求头中携带您的用户Token进行身份验证。</p>
+            </div>
+            
+            <div class="token-display" id="userTokenDisplay" style="display: none;">
+                <strong>🔑 您的用户Token：</strong>
+                <div class="url" id="userTokenValue">加载中...</div>
+                <button class="copy-btn" onclick="copyUserToken(event)">复制Token</button>
+            </div>
+
+            <h2>🔐 认证方式</h2>
+            <p>所有API请求都需要在请求头中包含您的用户Token：</p>
+            <div class="code-block">Authorization: Bearer YOUR_USER_TOKEN</div>
+
+            <h2>📋 接口列表</h2>
+
+            <div class="endpoint">
+                <h3>
+                    <span class="method get">GET</span>
+                    获取OAuth授权链接
+                </h3>
+                <div class="url">/api/external/auth-url</div>
+                
+                <h4>请求参数</h4>
+                <p>无需额外参数，直接请求即可获取标准授权链接。</p>
+
+                <h4>响应示例</h4>
+                <div class="code-block">{
+  "authorize_url": "https://auth.augmentcode.com/authorize?response_type=code&code_challenge=xxx&client_id=v&state=xxx&prompt=login"
+}</div>
+
+                <div class="example">
+                    <strong>📝 使用示例：</strong>
+                    <div class="code-block">curl -X GET "http://localhost:3000/api/external/auth-url" \
+  -H "Authorization: Bearer YOUR_USER_TOKEN"</div>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <h3>
+                    <span class="method post">POST</span>
+                    完成OAuth授权
+                </h3>
+                <div class="url">/api/external/complete-auth</div>
+                
+                <h4>请求体参数</h4>
+                <table>
+                    <tr>
+                        <th>参数名</th>
+                        <th>类型</th>
+                        <th>必需</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td>code</td>
+                        <td>string</td>
+                        <td>是</td>
+                        <td>OAuth授权码</td>
+                    </tr>
+                    <tr>
+                        <td>state</td>
+                        <td>string</td>
+                        <td>否</td>
+                        <td>状态参数验证</td>
+                    </tr>
+                    <tr>
+                        <td>tenant_url</td>
+                        <td>string</td>
+                        <td>是</td>
+                        <td>租户URL（必填）</td>
+                    </tr>
+                </table>
+
+                <h4>响应示例</h4>
+                <div class="code-block">{
+  "success": true,
+  "token": "access_token_value",
+  "tenant_url": "https://tenant.augmentcode.com",
+  "token_info": {
+    "id": 123,
+    "created_at": "2025-01-01T00:00:00Z"
+  },
+  "user": {
+    "uuid": "user_uuid",
+    "email": "user@example.com"
+  }
+}</div>
+
+                <div class="example">
+                    <strong>📝 使用示例：</strong>
+                    <div class="code-block">curl -X POST "http://localhost:3000/api/external/complete-auth" \
+  -H "Authorization: Bearer YOUR_USER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "authorization_code_from_callback",
+    "state": "state_value",
+    "tenant_url": "https://your-tenant.augmentcode.com"
+  }'</div>
+                </div>
+            </div>
+
+
+
+            <h2>❌ 错误响应</h2>
+            <p>当请求失败时，API会返回以下格式的错误响应：</p>
+            <div class="code-block">{
+  "success": false,
+  "error": "错误描述",
+  "details": "详细错误信息"
+}</div>
+
+            <h2>🔧 常见错误码</h2>
+            <table>
+                <tr>
+                    <th>状态码</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td>401</td>
+                    <td>未提供Token或Token无效</td>
+                </tr>
+                <tr>
+                    <td>400</td>
+                    <td>请求参数错误</td>
+                </tr>
+                <tr>
+                    <td>500</td>
+                    <td>服务器内部错误</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 引入导航组件脚本 -->
+    <script src="/components/nav.js"></script>
+    
+    <script>
+        // 页面加载完成后初始化
+        window.addEventListener('load', async () => {
+            // 初始化导航栏
+            await AppNav.init({
+                showUserInfo: true,
+                showProfileBtn: true,
+                showHomeBtn: true,
+                customButtons: [
+                    {
+                        text: 'API文档',
+                        href: '/api-docs',
+                        type: 'primary',
+                        icon: '📚'
+                    },
+                    {
+                        text: '外部接口测试',
+                        href: '/external-test',
+                        type: 'primary',
+                        icon: '🧪'
+                    }
+                ]
+            });
+            
+            // 显示用户Token
+            showUserToken();
+        });
+        
+        // 显示用户Token
+        function showUserToken() {
+            const currentUser = AppNav.getCurrentUser();
+            if (currentUser) {
+                // 获取用户Token
+                const userToken = getUserToken();
+                if (userToken) {
+                    document.getElementById('userTokenValue').textContent = userToken;
+                    document.getElementById('userTokenDisplay').style.display = 'block';
+                }
+            }
+        }
+        
+        // 获取用户Token
+        function getUserToken() {
+            // 从Cookie中获取
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'auth_token') {
+                    return value;
+                }
+            }
+            
+            // 从localStorage获取
+            return localStorage.getItem('auth_token');
+        }
+        
+        // 复制用户Token
+        async function copyUserToken(event) {
+            const token = getUserToken();
+            if (!token) {
+                alert('未找到Token');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(token);
+                const btn = event ? event.target : document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '已复制';
+                btn.style.background = '#48bb78';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#667eea';
+                }, 2000);
+            } catch (error) {
+                console.error('复制失败:', error);
+                // 降级方案：选中文本让用户手动复制
+                const tokenElement = document.getElementById('userTokenValue');
+                if (tokenElement) {
+                    const range = document.createRange();
+                    range.selectNode(tokenElement);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                }
+                alert('自动复制失败，已选中Token文本，请手动复制（Ctrl+C）');
+            }
+        }
+    </script>
+</body>
+</html>
